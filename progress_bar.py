@@ -1,3 +1,7 @@
+import time
+import datetime
+import numpy as np
+
 # Print iterations progress.
 # Adapted from https://stackoverflow.com/a/34325723.
 def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
@@ -31,3 +35,38 @@ def printProgressBarColor (iteration, total, prefix = '', suffix = '', decimals 
     fill = fill_prefix + fill + fill_suffix
     printProgressBar(iteration, total, prefix = prefix, suffix = suffix, decimals = decimals, length = length, fill = fill, printEnd = printEnd)
     return
+
+class ProgressBar():
+    """
+    An object-oriented approach to the progress bar.
+    Gives an estimated time remaining.
+    """
+
+    def __init__(self,prefix = '', suffix = '', decimals = 1, length = 25, fill = '█', printEnd = "\r", memory_depth=10):
+        self.prefix = prefix
+        self.suffix = suffix
+        self.decimals = decimals
+        self.length = length
+        self.fill = fill
+        self.printEnd = printEnd
+
+        self.mem_depth = memory_depth
+        self.timestamps = np.zeros(self.mem_depth)
+        self.ncalls = 0
+
+    def Print(self,iteration,total):
+
+        if(self.ncalls < self.mem_depth):
+            self.timestamps[self.ncalls] = time.time()
+            suffix = self.suffix
+        else:
+            self.timestamps = np.roll(self.timestamps,-1)
+            self.timestamps[-1] = time.time()
+            # For now, do a simple average speed.
+            # (could consider something fancier?)
+            remaining_time = (total - iteration) * (self.timestamps[-1] - self.timestamps[0]) / self.mem_depth
+            remaining_time_string = str(datetime.timedelta(seconds=remaining_time)).split('.')[0]
+            suffix = self.suffix + '   Estimated remaining: {}   '.format(remaining_time_string)
+
+        printProgressBar(iteration,total,self.prefix,suffix,self.decimals,self.length,self.fill,self.printEnd)
+        self.ncalls += 1
