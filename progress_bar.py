@@ -64,7 +64,7 @@ class ProgressBar():
             self.timestamps[-1] = time.time()
             # For now, do a simple average speed.
             # (could consider something fancier?)
-            remaining_time = (total - iteration) * (self.timestamps[-1] - self.timestamps[0]) / self.mem_depth
+            remaining_time = (total - iteration) * (self.timestamps[-1] - self.timestamps[0]) / (self.mem_depth - 1)
             remaining_time_string = str(datetime.timedelta(seconds=remaining_time)).split('.')[0]
             suffix = self.suffix + '   Estimated remaining: {}   '.format(remaining_time_string)
 
