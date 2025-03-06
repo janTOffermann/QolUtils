@@ -51,22 +51,36 @@ class ProgressBar():
         self.printEnd = printEnd
 
         self.mem_depth = memory_depth
+        self.counts = np.zeros(self.mem_depth)
         self.timestamps = np.zeros(self.mem_depth)
         self.ncalls = 0
+        self.t0 = 0.
 
     def Print(self,iteration,total):
 
         if(self.ncalls < self.mem_depth):
             self.timestamps[self.ncalls] = time.time()
+            self.counts[self.ncalls] = iteration
             suffix = self.suffix
+            if(self.ncalls == 0):
+                self.t0 = self.timestamps[0]
         else:
             self.timestamps = np.roll(self.timestamps,-1)
             self.timestamps[-1] = time.time()
-            # For now, do a simple average speed.
+            self.counts = np.roll(self.counts,-1)
+            self.counts[-1] = iteration
+            # For now, do a simple average speed. For this, we don't really need this whole array.
             # (could consider something fancier?)
-            remaining_time = (total - iteration) * (self.timestamps[-1] - self.timestamps[0]) / (self.mem_depth - 1)
+            rate = (self.counts[-1] - self.counts[0])/(self.timestamps[-1] - self.timestamps[0])
+            remaining_time = (total - iteration) / rate
             remaining_time_string = str(datetime.timedelta(seconds=remaining_time)).split('.')[0]
             suffix = self.suffix + '   Estimated remaining: {}   '.format(remaining_time_string)
+
+            # special case: end
+            if(iteration==total):
+                elapsed_time = self.timestamps[-1] - self.t0
+                time_string = str(datetime.timedelta(seconds=elapsed_time)).split('.')[0]
+                suffix = self.suffix + '   Elapsed time: {}   '.format(time_string)
 
         printProgressBar(iteration,total,self.prefix,suffix,self.decimals,self.length,self.fill,self.printEnd)
         self.ncalls += 1
