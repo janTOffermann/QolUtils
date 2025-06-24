@@ -1,6 +1,5 @@
 # Just some simple, quality-of-life functions. Nothing very fancy.
 import sys, os, uuid
-import ROOT as rt
 from contextlib import contextmanager
 
 def RN():
